@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Create Account - Video Circle</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="container">
+
+<h1>🎬 Video Circle</h1>
+
+<h3>Create New Account</h3>
+
+<input type="text" id="fullname" placeholder="Full Name">
+
+<input type="text" id="channelname" placeholder="Channel Name">
+
+<h3 class="dob-title">Date of Birth</h3>
+
+<div class="dob-row">
+
+<select id="day">
+  <option>Day</option>
+</select>
+
+<select id="month">
+  <option value="">Month</option>
+  <option value="January">January</option>
+  <option value="February">February</option>
+  <option value="March">March</option>
+  <option value="April">April</option>
+  <option value="May">May</option>
+  <option value="June">June</option>
+  <option value="July">July</option>
+  <option value="August">August</option>
+  <option value="September">September</option>
+  <option value="October">October</option>
+  <option value="November">November</option>
+  <option value="December">December</option>
+</select>
+
+<select id="year">
+  <option>Year</option>
+</select>
+
+</div>
+<select id="gender">
+  <option value="">Select Gender</option>
+  <option>Male</option>
+  <option>Female</option>
+  <option>Other</option>
+</select>
+
+<input type="tel" id="mobile" placeholder="Mobile Number">
+
+<input type="email" id="email" placeholder="Email">
+
+<input type="password" id="password" placeholder="Password">
+
+<input type="password" id="confirmPassword" placeholder="Confirm Password">
+
+<button onclick="signup()">Create Account</button>
+
+<p>Already have an account?</p>
+
+<a href="index.html">Login Here</a>
+
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

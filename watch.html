@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Watch Video</title>
+
+<style>
+
+body{
+margin:0;
+background:black;
+overflow:hidden;
+}
+
+#watchVideo{
+width:100vw;
+height:100vh;
+object-fit:contain;
+background:black;
+}
+
+#backBtn{
+position:fixed;
+top:20px;
+left:15px;
+
+z-index:9999;
+
+background:rgba(0,0,0,.5);
+color:white;
+
+border:none;
+
+padding:10px 15px;
+
+border-radius:20px;
+}
+#videoActions{
+position:fixed;
+right:12px;
+bottom:120px;
+
+display:flex;
+flex-direction:column;
+gap:18px;
+
+z-index:999;
+}
+
+.action-btn{
+color:white;
+font-size:18px;
+text-align:center;
+font-weight:bold;
+text-shadow:0 0 5px black;
+}
+
+#videoInfo{
+position:fixed;
+left:15px;
+bottom:80px;
+
+color:white;
+
+z-index:999;
+
+text-shadow:0 0 5px black;
+}
+
+#watchChannel{
+font-size:18px;
+font-weight:bold;
+margin-bottom:5px;
+}
+
+#watchTitle{
+font-size:15px;
+max-width:250px;
+}
+#commentsPanel{
+position:fixed;
+left:0;
+bottom:-100%;
+width:100%;
+height:50vh;
+
+background:white;
+
+z-index:9999;
+
+border-radius:20px 20px 0 0;
+
+transition:.3s;
+}
+
+#commentsPanel.show{
+bottom:0;
+}
+
+.comment-header{
+padding:15px;
+font-size:18px;
+font-weight:bold;
+border-bottom:1px solid #ddd;
+}
+
+#commentsList{
+height:250px;
+overflow:auto;
+padding:10px;
+}
+
+.comment-input-box{
+display:flex;
+padding:10px;
+gap:10px;
+}
+
+.comment-input-box input{
+flex:1;
+padding:10px;
+}
+
+.comment-input-box button{
+padding:10px 15px;
+}
+</style>
+</head>
+<body>
+
+<button
+id="backBtn"
+onclick="history.back()">
+← Back
+</button>
+
+<video
+id="watchVideo"
+controls
+autoplay
+  muted
+playsinline>
+</video>
+<div id="videoActions">
+
+<div class="action-btn">
+
+❤️
+
+<div id="watchLikeCount">
+0
+</div>
+
+</div>
+
+<div class="action-btn"
+onclick="toggleComments()">
+
+💬
+
+<div id="watchCommentCount">0</div>
+
+</div>
+
+<div class="action-btn">
+📤
+<div>Share</div>
+</div>
+
+<div class="action-btn">
+👁️
+<div id="watchViewCount">0</div>
+</div>
+
+</div>
+
+<div id="videoInfo">
+
+<div id="watchChannel">
+@Channel Name
+</div>
+
+<div id="watchTitle">
+Video Title
+</div>
+
+</div>
+<div id="commentsPanel">
+
+<div class="comment-header">
+Comments
+</div>
+
+<div id="commentsList"></div>
+
+<div class="comment-input-box">
+
+<input
+type="text"
+id="commentInput"
+placeholder="Write a comment...">
+
+<button onclick="addComment()">
+Send
+</button>
+
+</div>
+
+</div>
+<script type="module">
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
+import {
+getFirestore,
+doc,
+getDoc,
+collection,
+query,
+where,
+getDocs,
+addDoc,
+orderBy
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCmsMiA6z6noYBkVCRxcXqH1s5atnfXEVQ",
+  authDomain: "video-circle-52af7.firebaseapp.com",
+  projectId: "video-circle-52af7",
+  storageBucket: "video-circle-52af7.firebasestorage.app",
+  messagingSenderId: "433167331683",
+  appId: "1:433167331683:web:342dff0c3bf1de8a606356"
+};
+
+const app =
+initializeApp(firebaseConfig);
+
+const db =
+getFirestore(app);
+const video =
+document.getElementById("watchVideo");
+
+video.src =
+localStorage.getItem("selectedVideo");
+const videoId =
+localStorage.getItem("selectedVideoId");
+const videoRef =
+doc(db,"videos",videoId);
+
+const videoSnap =
+await getDoc(videoRef);
+
+if(videoSnap.exists()){
+
+const data =
+videoSnap.data();
+
+document.getElementById("watchTitle")
+.innerText =
+data.title || "";
+
+document.getElementById("watchChannel")
+.innerText =
+"@" + (data.channelName || "");
+
+document.getElementById("watchLikeCount")
+.innerText =
+data.likes || 0;
+
+document.getElementById("watchViewCount")
+.innerText =
+data.views || 0;
+
+const commentsQuery =
+query(
+collection(db,"comments"),
+where("videoId","==",videoId)
+);
+
+const commentsSnap =
+await getDocs(commentsQuery);
+
+document.getElementById("watchCommentCount")
+.innerText =
+commentsSnap.size;
+const commentsList =
+document.getElementById("commentsList");
+
+commentsList.innerHTML = "";
+
+for (const commentDoc of commentsSnap.docs) {
+
+const commentData =
+commentDoc.data();
+const repliesQuery =
+query(
+collection(db,"replies"),
+where("commentId","==",commentDoc.id)
+);
+
+const repliesSnap =
+await getDocs(repliesQuery);
+
+let repliesHtml = "";
+
+repliesSnap.forEach((replyDoc)=>{
+
+const replyData =
+replyDoc.data();
+
+repliesHtml += `
+<div style="
+margin-left:20px;
+margin-top:8px;
+padding:6px;
+background:#f5f5f5;
+border-radius:8px;
+">
+
+<b>${replyData.userName}</b>
+
+<br>
+
+${replyData.text}
+
+</div>
+`;
+
+});
+console.log(commentData);
+
+commentsList.innerHTML += `
+<div style="
+padding:10px;
+border-bottom:1px solid #ddd;
+">
+
+<b>
+${commentData.userName || "User"}
+</b>
+
+<br>
+
+${commentData.text || ""}
+
+<br><br>
+
+<button
+style="
+border:none;
+background:none;
+color:blue;
+font-size:14px;
+cursor:pointer;
+"
+onclick="replyComment('${commentDoc.id}')">
+
+Reply
+
+</button>
+
+${repliesHtml}
+
+</div>
+`;
+
+}
+}
+video.play().catch(()=>{
+console.log("Autoplay blocked");
+});
+window.toggleComments = function(){
+
+document
+.getElementById("commentsPanel")
+.classList.toggle("show");
+
+}
+window.addComment = function(){
+
+alert("Comment Function Coming Next");
+
+}
+
+window.replyComment = async function(commentId){
+
+const replyText =
+prompt("Write Reply");
+
+if(!replyText) return;
+
+const userName =
+localStorage.getItem("channelName")
+|| "User";
+
+await addDoc(
+collection(db,"replies"),
+{
+commentId: commentId,
+userName: userName,
+text: replyText,
+createdAt: Date.now()
+}
+);
+
+alert("Reply Saved ✅");
+
+}
+</script>
+
+</body>
+</html>

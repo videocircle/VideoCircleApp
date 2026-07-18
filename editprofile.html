@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>Edit Profile</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+<style>
+
+body{
+
+margin:0;
+background:#f5f5f5;
+font-family:Arial;
+
+}
+
+.header{
+
+background:black;
+color:white;
+
+padding:16px;
+
+font-size:22px;
+font-weight:bold;
+text-align:center;
+
+}
+
+.container{
+
+max-width:500px;
+margin:auto;
+
+padding:20px;
+
+}
+
+.profile-pic{
+
+width:120px;
+height:120px;
+
+border-radius:50%;
+
+object-fit:cover;
+
+display:block;
+
+margin:auto;
+
+border:3px solid black;
+
+}
+
+.edit-photo{
+
+display:block;
+
+margin:15px auto;
+
+}
+
+input,
+textarea{
+
+width:100%;
+
+padding:12px;
+
+margin-top:15px;
+
+font-size:16px;
+
+box-sizing:border-box;
+
+}
+
+textarea{
+
+height:100px;
+resize:none;
+
+}
+
+.save-btn{
+
+width:100%;
+
+padding:14px;
+
+margin-top:20px;
+
+background:black;
+
+color:white;
+
+border:none;
+
+border-radius:10px;
+
+font-size:18px;
+
+}
+
+.cancel-btn{
+
+width:100%;
+
+padding:14px;
+
+margin-top:10px;
+
+background:#ddd;
+
+border:none;
+
+border-radius:10px;
+
+font-size:18px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+
+✏️ Edit Profile
+
+</div>
+
+<div class="container">
+
+<img
+id="editProfilePic"
+class="profile-pic"
+src="https://via.placeholder.com/150">
+
+<input
+type="file"
+id="profileImage"
+accept="image/*">
+
+<input
+type="text"
+id="editFullName"
+placeholder="Full Name">
+
+<input
+type="text"
+id="editChannelName"
+placeholder="Channel Name">
+<div
+id="channelStatus"
+style="
+margin-top:6px;
+font-size:14px;
+font-weight:bold;
+">
+</div>
+<textarea
+id="editBio"
+placeholder="Write your bio...">
+</textarea>
+
+<button
+class="save-btn"
+id="saveProfileBtn">
+
+Save Changes
+
+</button>
+
+<button
+class="cancel-btn"
+onclick="history.back()">
+
+Cancel
+
+</button>
+
+</div>
+<script type="module">
+
+import {
+doc,
+getDoc,
+updateDoc,
+collection,
+query,
+where,
+getDocs
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+import { db, auth } from "./firebase.js";
+  import {
+  CLOUD_NAME,
+  UPLOAD_PRESET
+} from "./config.js";
+  import {
+  showLoading,
+  hideLoading
+} from "./utils.js";
+onAuthStateChanged(auth, async(user)=>{
+
+if(!user){
+
+window.location.href = "index.html";
+
+return;
+
+}
+
+const userRef =
+doc(db,"users",user.uid);
+
+const userSnap =
+await getDoc(userRef);
+
+if(!userSnap.exists()){
+
+alert("User Not Found");
+
+return;
+
+}
+
+const data =
+userSnap.data();
+if (!data.channelNameLower && data.channelName) {
+
+await updateDoc(userRef, {
+channelNameLower: data.channelName.toLowerCase().trim()
+});
+
+}
+document.getElementById("editFullName").value =
+data.fullName || "";
+
+document.getElementById("editChannelName").value =
+data.channelName || "";
+
+document.getElementById("editBio").value =
+data.bio || "";
+
+if(data.profilePic){
+
+document.getElementById("editProfilePic").src =
+data.profilePic;
+
+}
+
+});
+
+document
+.getElementById("saveProfileBtn")
+.addEventListener("click", saveProfile);
+async function saveProfile(){
+const saveBtn = document.getElementById("saveProfileBtn");
+
+showLoading(saveBtn);
+const user = auth.currentUser;
+
+if(!user){
+
+alert("Login Required");
+
+return;
+
+}
+
+const fullName =
+document.getElementById("editFullName").value.trim();
+
+const channelName =
+document.getElementById("editChannelName").value.trim();
+const userDoc = await getDoc(doc(db, "users", user.uid));
+const oldChannelName = userDoc.data().channelName;
+const bio =
+document.getElementById("editBio").value.trim();
+let profilePicUrl =
+document.getElementById("editProfilePic").src;
+if (!fullName) {
+
+alert("Enter your full name");
+
+showLoading(saveBtn);
+
+return;
+
+}
+
+if (!channelName) {
+
+alert("Enter channel name");
+
+showLoading(saveBtn);
+return;
+
+}
+
+if (bio.length > 150) {
+
+alert("Bio must be under 150 characters");
+
+showLoading(saveBtn);
+
+return;
+
+}
+const channelQuery =
+query(
+collection(db,"users"),
+where(
+"channelNameLower",
+"==",
+channelName.toLowerCase().trim()
+)
+);
+
+const channelSnap =
+await getDocs(channelQuery);
+
+let alreadyExists = false;
+
+channelSnap.forEach(docSnap => {
+
+if(docSnap.id !== user.uid){
+
+alreadyExists = true;
+
+}
+
+});
+
+if(alreadyExists){
+
+alert("Channel Name Already Exists");
+
+hideLoading(saveBtn);
+
+return;
+
+}
+const selectedFile = profileImage.files[0];
+
+if(selectedFile){
+
+const formData = new FormData();
+
+formData.append("file", selectedFile);
+
+formData.append("upload_preset", UPLOAD_PRESET);
+
+// alert("Image Ready For Upload ✅");
+
+const response = await fetch(
+`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+{
+method:"POST",
+body:formData
+}
+);
+
+const result = await response.json();
+
+profilePicUrl = result.secure_url;
+
+// alert("Upload Success ✅");
+
+}
+await updateDoc(
+doc(db,"users",user.uid),
+{
+  fullName: fullName,
+  channelName: channelName,
+  channelNameLower: channelName.toLowerCase().trim(),
+  bio: bio,
+  profilePic: profilePicUrl
+}
+);
+  // Update channelName in all videos
+
+const videosQuery = query(
+    collection(db, "videos"),
+    where("channelName", "==", oldChannelName)
+);
+
+const videosSnap = await getDocs(videosQuery);
+
+for (const videoDoc of videosSnap.docs) {
+
+    await updateDoc(videoDoc.ref, {
+        channelName: channelName
+    });
+
+}
+  // ==========================
+// Update Followers Collection
+// ==========================
+
+// Update follower field
+const followersQuery = query(
+    collection(db, "followers"),
+    where("follower", "==", oldChannelName)
+);
+
+const followersSnap = await getDocs(followersQuery);
+
+for (const followerDoc of followersSnap.docs) {
+
+    await updateDoc(followerDoc.ref, {
+        follower: channelName
+    });
+
+}
+
+// Update following field
+const followingQuery = query(
+    collection(db, "followers"),
+    where("following", "==", oldChannelName)
+);
+
+const followingSnap = await getDocs(followingQuery);
+
+for (const followingDoc of followingSnap.docs) {
+
+    await updateDoc(followingDoc.ref, {
+        following: channelName
+    });
+
+}
+hideLoading(saveBtn);
+
+window.location.href = "profile.html";
+}
+const channelInput =
+document.getElementById("editChannelName");
+
+channelInput.addEventListener(
+"input",
+checkChannelName
+);
+
+async function checkChannelName(){
+
+const channelName =
+channelInput.value.trim();
+
+const status =
+document.getElementById("channelStatus");
+
+if(channelName===""){
+
+status.innerHTML = "";
+
+return;
+
+}
+
+status.innerHTML = "Checking...";
+const channelQuery =
+query(
+collection(db,"users"),
+where(
+"channelNameLower",
+"==",
+channelName.toLowerCase().trim()
+)
+);
+
+const channelSnap =
+await getDocs(channelQuery);
+
+if(
+channelSnap.empty
+){
+
+status.style.color = "green";
+
+status.innerHTML =
+"✅ Available";
+
+}else{
+
+let foundOtherUser = false;
+
+channelSnap.forEach(docSnap => {
+
+if (docSnap.id !== auth.currentUser.uid) {
+
+foundOtherUser = true;
+
+}
+
+});
+
+if (foundOtherUser) {
+
+status.style.color = "red";
+status.innerHTML = "❌ Already Taken";
+
+} else {
+
+status.style.color = "green";
+status.innerHTML = "✅ Your Current Channel";
+
+}
+}
+}
+profileImage.addEventListener(
+"change",
+function(){
+
+const file =
+profileImage.files[0];
+
+if(file){
+
+const imageURL =
+URL.createObjectURL(file);
+
+document
+.getElementById("editProfilePic")
+.src = imageURL;
+
+}
+
+}
+);
+
+// आगे का code यहाँ आएगा
+  
+</script>
+</body>
+
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Video Circle Login</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<script>
+if(localStorage.getItem("loggedIn") === "true"){
+    window.location.href = "home.html";
+}
+</script>
+<body>
+
+<div class="container">
+
+<h1>🎬 Video Circle</h1>
+
+<h3>Login</h3>
+
+<input type="email" id="email" placeholder="Email">
+
+<input type="password" id="password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<p>Don't have an account?</p>
+
+<a href="signup.html">Create New Account</a>
+
+</div>
+
+<script type="module" src="app.js"></script>
+
+</body>
+</html>

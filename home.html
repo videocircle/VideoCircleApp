@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Video Circle Home</title>
+
+<link rel="stylesheet" href="style.css">
+
+<style>
+
+body{
+    margin:0;
+    background:#f5f5f5;
+    font-family:Arial;
+    overflow: hidden;
+}
+
+.header{
+    background:#000;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.welcome{
+    padding:15px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.feed{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100vh
+
+  transition: none;
+will-change: transform;
+}
+
+.video-card{
+    background:white;
+    margin:10px;
+    border-radius:12px;
+    overflow:hidden;
+    box-shadow:0 2px 5px rgba(0,0,0,0.1);
+}
+
+.video-card video{
+    width:100%;
+}
+
+.video-info{
+    padding:10px;
+}
+
+.channel-bar{
+display:flex;
+align-items:center;
+gap:10px;
+position:absolute;
+bottom:50px;
+left:15px;
+z-index:10px;
+}
+
+#profileThumb{
+width:30px;
+height:30px;
+border-radius:50%;
+object-fit:cover;
+border:2px solid white;
+flex-shrink:0;
+}
+
+#channelName{
+color:white;
+font-size:14px;
+font-weight:bold;
+text-shadow:0 0 5px black;
+white-space:nowrap;
+}
+
+#followBtn{
+background:white;
+color:black;
+border:none;
+padding:8px 18px;
+border-radius:25px;
+font-weight:bold;
+font-size:14px;
+height:40px;
+min-width:120px;
+}
+
+.bottom-nav{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    z-index:100;
+    height:45px;
+    background:white;
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    border-top:1px solid #ddd;
+}
+
+.nav-btn{
+    font-size:26px;
+    border:none;
+    background:none;
+}
+#commentBox{
+ display:none;
+ position:fixed;
+ left:0;
+ bottom:0;
+ width:100%;
+ height:70vh;
+ background:#fff;
+ border-radius:20px 20px 0 0;
+ z-index:99999;
+ overflow-y:auto;
+ padding:13px;
+ box-sizing:border-box;
+ box-shadow:0 -5px 20px rgba(0,0,0,.2);
+}
+.comment-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
+}
+
+.close-btn{
+    border:none;
+    background:none;
+    font-size:34px;
+    font-weight:bold;
+    color:black;
+    cursor:pointer;
+    width:40px;
+    height:40px;
+    padding:0;
+    line-height:40px;
+    text-align:center;
+}
+
+.comment-input{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+    width:100%;
+}
+
+.comment-input input{
+    flex:1;
+    height:50px;
+    padding:0 15px;
+    border:1px solid #ddd;
+    border-radius:25px;
+    font-size:16px;
+    box-sizing:border-box;
+}
+
+.comment-input button{
+    width:110px;
+    height:50px;
+    border:none;
+    border-radius:25px;
+    background:black;
+    color:white;
+    font-size:18px;
+}
+  .comment{
+
+padding:12px;
+
+border-bottom:1px solid #eee;
+
+}
+
+.comment-user{
+
+font-weight:bold;
+
+font-size:15px;
+
+margin-bottom:5px;
+
+}
+
+.comment-text{
+
+font-size:15px;
+
+margin-bottom:8px;
+
+word-break:break-word;
+
+}
+
+.comment-actions{
+
+display:flex;
+
+gap:20px;
+
+font-size:14px;
+
+color:#666;
+
+}
+
+.comment-like,
+.comment-reply{
+
+cursor:pointer;
+
+}
+.drag-line{
+ width:50px;
+ height:5px;
+ background:#ccc;
+ border-radius:20px;
+ margin:0 auto 15px;
+}
+.like-btn{
+    background:#fff;
+    border:1px solid #ddd;
+    padding:10px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:14px;
+    text-align:center;
+}
+.actions{
+position:absolute;
+right:12px;
+bottom:240px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+z-index:20;
+}
+
+.actions button{
+background:none;
+border:none;
+color:white;
+font-size:18px;
+font-weight:bold;
+text-shadow:0 0 8px black;
+cursor:pointer;
+}
+#loader{
+position:fixed;
+top:50%;
+left:50%;
+width:50px;
+height:50px;
+margin-left:-25px;
+margin-top:-25px;
+
+border:5px solid rgba(255,255,255,0.3);
+border-top:5px solid white;
+
+border-radius:50%;
+
+animation:spin 1s linear infinite;
+
+display:none;
+
+z-index:99999;
+}
+.bell-container{
+  position: relative;
+  display: inline-block;
+}
+
+.badge{
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  text-align: center;
+  line-height: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+  #currentLayer,
+#nextLayer{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+}
+
+#currentLayer{
+    z-index:2;
+}
+
+#nextLayer{
+    top:100%;
+    z-index:1;
+}
+  #videoLayer{
+    position:absolute;
+    inset:0;
+    overflow:hidden;
+  }
+@keyframes spin{
+0%{
+transform:rotate(0deg);
+}
+100%{
+transform:rotate(360deg);
+}
+}
+
+</style>
+
+</head>
+<body>
+<div class="header">
+🎬 Video Circle
+</div>
+
+<div id="home">
+
+<div class="feed">
+<div id="videoLayer">
+  <div id="currentLayer">
+
+<video
+id="feedVideo"
+class="video-player"
+loop
+playsinline
+style="
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+">
+</video>
+
+  </div>
+
+<div id="nextLayer">
+
+<video
+id="preloadVideo"
+class="video-player"
+muted
+playsinline
+preload="auto"
+style="
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+pointer-events:none;
+">
+</video>
+
+</div>
+
+</div>
+  <video
+  
+    class="video-player"
+    muted
+    playsinline
+    preload="auto"
+    style="
+transition:opacity .08s linear;
+        position:absolute;
+top:100%;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+pointer-events:none;
+z-index:1;
+opacity:1;
+transform:translateY(0);
+will-change:transform;
+    ">
+  </video>
+<div id="loader"></div>
+<div class="video-info">
+
+<div class="channel-bar">
+
+<img
+id="profileThumb"
+src="https://via.placeholder.com/50"
+onclick="openProfile()">
+
+<span
+id="channelName"
+onclick="openProfile()">
+</span>
+
+<button
+id="followBtn"
+onclick="followUser()">
+Follow
+</button>
+
+</div>
+
+<p id="videoTitle"></p>
+
+</div>
+
+<div class="actions">
+
+<button id="likeBtn" onclick="likeVideo()">❤️<br><span id="likeCount">0</span></button>
+<button id="commentBtn" onclick="openComments()">
+💬<br><span id="commentCount">0</span>
+</button>
+<button onclick="shareVideo()">
+📤<br>Share
+</button>
+  <button>
+👁️<br>
+<span id="viewCount">0</span>
+</button>
+  <button id="reportVideoBtn" onclick="openReportDialog()">
+🚩<br>Report
+  </button>
+</div>
+
+<div id="commentBox">
+  <div class="drag-line"></div>
+<div class="comment-header">
+
+<h2>Comments</h2>
+
+<button class="close-btn"
+onclick="closeComments()">
+×
+</button>
+
+</div>
+
+<div id="replyBox" class="reply-box" style="display:none;">
+
+    <div class="reply-title">
+        💬 Reply
+    </div>
+
+    <textarea
+        id="replyInput"
+        placeholder="Write your reply...">
+    </textarea>
+
+    <div class="reply-actions">
+
+        <button
+            id="cancelReply">
+            Cancel
+        </button>
+
+        <button
+            id="sendReply">
+            Reply
+        </button>
+
+    </div>
+
+</div>
+<div id="commentsList"></div>
+<div class="comment-input">
+
+<input
+id="commentInput"
+placeholder="Write comment...">
+
+<button onclick="addComment()">
+Send
+</button>
+
+</div>
+</div>
+</div>
+
+<div class="bottom-nav">
+
+    <button onclick="location.href='home.html'">
+        🏠
+    </button>
+
+    <button onclick="location.href='upload.html'">
+        ➕
+    </button>
+    <button onclick="location.href='search.html'">
+🔍
+</button>
+<button onclick="location.href='notifications.html'">
+
+<div class="bell-container">
+
+<span>
+🔔
+</span>
+
+<span id="notificationCount" class="badge">
+0
+</span>
+
+</div>
+
+</button>
+    <button onclick="location.href='profile.html'">
+        👤
+    </button>
+
+</div>
+<div id="reportDialog" class="modal">
+
+    <div class="modal-box">
+
+        <h2>🚩Report Video</h2>
+
+        <p>Select Report Reason</p>
+
+        <select id="reportReason">
+
+            <option value="Spam">Spam</option>
+
+            <option value="Violence">Violence</option>
+
+            <option value="Adult">Adult Content</option>
+
+            <option value="Copyright">Copyright</option>
+
+            <option value="Other">Other</option>
+
+        </select>
+
+        <button onclick="submitReport()">
+            Submit Report
+        </button>
+
+        <button onclick="closeReportDialog()">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+  
+<script type="module">
+
+if(localStorage.getItem("loggedIn") !== "true"){
+window.location.href="index.html";
+}
+// ===============================
+// Maintenance Mode Check
+// ===============================
+
+const settingsSnap = await getDoc(
+    doc(db,"settings","app")
+);
+
+if(settingsSnap.exists()){
+
+    const settings = settingsSnap.data();
+
+    if(settings.maintenance === true){
+
+        window.location.href =
+        "maintenance.html";
+
+        throw new Error("Maintenance Mode");
+
+    }
+
+}
+import {
+    db } from "./firebase.js";
+import {
+    updateFollowData
+} from "./follow.js";
+  import {
+shareVideo
+} from "./share.js";
+  import {
+startViewTimer,
+stopViewTimer
+} from "./view.js";
+  import {
+    likeVideo,
+    enableDoubleTap,
+    refreshLikeUI
+} from "./like.js";
+  import {
+    openComments,
+    closeComments,
+    loadComments,
+    addComment,
+    isCommentBoxOpen
+} from "./comment.js";
+  import {
+    enableSwipe,
+    goToNextVideo,
+    goToPreviousVideo
+} from "./swipe.js";
+  import {
+loadChannelInfo,
+getFollowState,
+setProfileUI,
+updateFollowButton,
+updateLikeButton,
+updateCommentCount,
+updateViewCount,
+setupProfile,
+refreshViewUI,
+startCurrentViewTimer,
+stopCurrentViewTimer
+} from "./videoLoader.js";
+    import {
+    initializeHome,
+    loadFeedData,
+    getChannelName,
+    getVideoUrl,
+    getVideoTitle,
+    getVideoViews
+} from "./homeController.js";
+  window.openComments = () => {
+    openComments(videos[currentIndex].id);
+};
+
+window.closeComments = closeComments;
+
+window.addComment = () => {
+    addComment(videos[currentIndex].id);
+};
+import {
+collection,
+doc,
+getDoc,
+getDocs,
+query,
+orderBy,
+where,
+addDoc,
+serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+// =====================================
+// GLOBAL VARIABLES
+// =====================================
+  let videos = [];
+
+let currentIndex = 0;
+
+let viewTimer = null;
+
+  let preloadIndex = -1;
+
+let preloadReady = false;
+
+let currentVideoUrl = "";
+  let activePlayer = "feed";
+let pendingIndex = -1;
+let switchingVideo = false;
+  let audioEnabled = false;
+  window.currentVideoId = "";
+window.currentOwnerId = "";
+  function getActiveVideoPlayer() {
+
+    return activePlayer === "feed"
+        ? feedVideo
+        : preloadVideo;
+
+  }
+  function switchActivePlayer() {
+
+    activePlayer =
+        activePlayer === "feed"
+        ? "preload"
+        : "feed";
+
+    console.log("🎬 Active Player:", activePlayer);
+
+  }
+  function getInactiveVideoPlayer() {
+
+    return activePlayer === "feed"
+        ? preloadVideo
+        : feedVideo;
+
+  }
+  function preparePlayer(player, videoUrl) {
+if (player.currentSrc === videoUrl) {
+    return;
+}
+    player.pause();
+
+    player.removeAttribute("src");
+
+    player.muted = (player.id === "preloadVideo") ? true : !audioEnabled;
+
+    player.autoplay = true;
+
+    player.playsInline = true;
+
+    player.preload = "auto";
+
+    player.src = videoUrl;
+
+player.load();
+
+player.style.visibility = "hidden";
+player.style.opacity = "0";
+  }
+  const feedVideo =
+document.getElementById("feedVideo");
+const preloadVideo =
+document.getElementById("preloadVideo");
+const loaderElement =
+document.getElementById("loader");
+  
+// ==========================
+// NOTIFICATION SYSTEM
+// ==========================
+initializeHome();
+  console.log("UID =", localStorage.getItem("uid"));
+console.log("All LocalStorage =", localStorage);
+// =====================================
+// VIDEO DATA
+// =====================================
+const feedData = await loadFeedData();
+
+const snapshot = feedData.snapshot;
+
+videos = feedData.videos;
+if (videos.length > 0) {
+
+    await loadVideo(0);
+
+} else {
+
+    alert("No videos available.");
+
+}
+  window.addEventListener("online", async () => {
+
+    console.log("🌐 Internet Restored");
+loaderElement.style.display = "none";
+    switchingVideo = false;
+
+    preloadReady = false;
+
+    try {
+
+        await loadVideo(currentIndex);
+
+    } catch (e) {
+
+        console.error("Recovery Failed:", e);
+
+    }
+
+});
+  window.currentVideoId = snapshot.docs[currentIndex].id;
+window.currentOwnerId = videos[currentIndex].userId;
+  
+  window.addEventListener("offline", () => {
+
+    console.log("📴 Internet Lost");
+
+    loaderElement.style.display = "block";
+
+});
+// =====================================
+// LOAD VIDEO
+// =====================================
+async function loadVideo(index){
+  
+  if (index < 0 || index >= videos.length) {
+    console.log("Invalid video index:", index);
+    return;
+  }
+  console.log("LOAD VIDEO :", index);
+  console.time("Video Load");
+  if (switchingVideo) {
+
+    console.log("⏳ Video switch already in progress");
+
+    return;
+
+}
+
+switchingVideo = true;
+
+pendingIndex = index;
+  stopCurrentViewTimer(viewTimer);
+
+
+const video = getActiveVideoPlayer();
+  feedVideo.muted = true;
+preloadVideo.muted = true;
+
+video.muted = !audioEnabled;
+  console.log("🎬 Active:", activePlayer);
+
+console.log(
+    "📺 Current Player:",
+    video.id
+);
+video.muted = !audioEnabled;
+  preloadVideo.muted = true;
+video.autoplay = true;
+video.playsInline = true;
+video.preload = "auto";
+  
+if (!(preloadReady && preloadIndex === index)) {
+
+    loaderElement.style.display = "block";
+
+} else {
+
+    loaderElement.style.display = "none";
+
+    console.log("⚡ Using Preloaded Video");
+
+}
+video.pause();
+  
+preparePlayer(
+    video,
+    getVideoUrl(videos, index)
+);
+const nextIndex = index + 1;
+
+preloadReady = false;
+preloadIndex = -1;
+
+if (nextIndex < videos.length) {
+
+    const preloadPlayer = getInactiveVideoPlayer();
+console.log(
+    "⏭️ Preloading On:",
+    preloadPlayer.id
+);
+preparePlayer(     preloadPlayer,     getVideoUrl(videos, nextIndex) );
+
+    preloadPlayer.onloadeddata = () => {
+
+        preloadReady = true;
+        preloadIndex = nextIndex;
+
+        console.log("✅ Preloaded:", preloadIndex);
+
+        preloadPlayer.onloadeddata = null;
+
+    };
+
+}
+video.onloadeddata = async ()=>{
+video.style.visibility = "visible";
+  video.style.opacity = "1";
+loaderElement.style.display = "none";
+
+try{
+
+await video.play();
+
+console.timeEnd("Video Load");
+
+video.onloadeddata = null;
+
+switchingVideo = false;
+
+console.log("Video Started");
+try {
+
+    await setupProfile(videos, index);
+
+} catch (error) {
+
+    console.error("Profile setup failed:", error);
+
+}
+  } catch (e) {
+
+    console.error(e);
+
+} finally {
+
+    switchingVideo = false;
+
+}
+
+};
+
+const videoId =
+videos[index].id;
+
+const currentVideoIndex = index;
+
+  viewTimer = startCurrentViewTimer(
+
+video,
+
+videoId,
+
+currentVideoIndex,
+
+() => currentIndex,
+
+videos,
+
+(views)=>{
+
+    refreshViewUI(views);
+
+}
+
+);
+
+document.getElementById("videoTitle").innerText =
+getVideoTitle(videos, index);
+
+ document.getElementById("likeCount").innerText =
+ videos[index].likes || 0;
+
+updateViewCount(
+    getVideoViews(videos, index)
+);
+
+const commentsQuery =
+query(
+collection(db,"comments"),
+where("videoId","==",videoId)
+);
+
+const commentsSnap =
+await getDocs(commentsQuery);
+
+updateCommentCount(
+commentsSnap.size
+);
+updateLikeButton(
+videoId,
+videos[index].likes
+);
+}
+// =====================================
+// LIKE SYSTEM
+// =====================================
+window.likeVideo = async function(){
+
+const liked = await likeVideo(
+videos,
+snapshot,
+currentIndex
+);
+
+refreshLikeUI(
+    liked,
+    videos[currentIndex].likes
+);
+
+}
+// =====================================
+// COMMENT SYSTEM
+// =====================================
+window.followUser = async function () {
+
+    const channel = videos[currentIndex].channelName;
+
+    const isFollowing = await getFollowState(
+        localStorage.getItem("uid"),
+        window.followingUid
+    );
+
+    await updateFollowData(
+        localStorage.getItem("channelName"),
+        localStorage.getItem("uid"),
+        channel,
+        window.followingUid,
+        !isFollowing
+    );
+
+    await updateFollowButton(getFollowState);
+
+};
+
+enableSwipe(
+
+document.querySelector(".feed"),
+
+async () => {
+if (!audioEnabled) {
+    audioEnabled = true;
+}
+currentIndex = await goToNextVideo(
+    currentIndex,
+    videos,
+    loadVideo
+);
+
+},
+
+async () => {
+
+    if (!audioEnabled) {
+        audioEnabled = true;
+    }
+
+    currentIndex = await goToPreviousVideo(
+        currentIndex,
+        loadVideo
+    );
+
+},
+
+() =>
+
+isCommentBoxOpen()
+
+);
+  const video =
+document.getElementById("feedVideo");
+
+enableDoubleTap(video, async ()=>{
+
+const liked =
+await likeVideo(
+videos,
+snapshot,
+currentIndex
+);
+
+refreshLikeUI(
+    liked,
+    videos[currentIndex].likes
+);
+
+});
+// =====================================
+// SHARE SYSTEM
+// =====================================
+window.shareVideo = function(){
+
+shareVideo(
+videos,
+currentIndex
+);
+
+}
+// =====================================
+// PROFILE SYSTEM
+// =====================================
+window.openProfile = function(){
+
+const channel =
+videos[currentIndex].channelName;
+
+localStorage.setItem(
+"viewProfile",
+channel
+);
+
+window.location.href =
+"userprofile.html";
+
+}
+
+</script>
+<div id="commentMenu" class="comment-menu">
+
+    <div class="comment-menu-sheet">
+
+        <button id="editCommentBtn">
+            ✏️ Edit
+        </button>
+
+        <button id="deleteCommentBtn">
+            🗑 Delete
+        </button>
+
+        <button id="cancelCommentMenu">
+            Cancel
+        </button>
+
+    </div>
+
+</div>
+</body>
+</html>
