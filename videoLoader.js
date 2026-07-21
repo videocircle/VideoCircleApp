@@ -14,7 +14,7 @@ stopViewTimer
 import {
 loadComments
 } from "./comment.js";
-
+const profileCache = {};
 export async function getFollowState(myUid, followingUid){
 
 const followQuery = query(
@@ -30,7 +30,9 @@ return !followSnap.empty;
 }
 
 export async function loadChannelInfo(channel){
-
+if(profileCache[channel]){
+    return profileCache[channel];
+}
 const userQuery = query(
 collection(db,"users"),
 where("channelName","==",channel)
@@ -42,10 +44,17 @@ if(userSnap.empty){
 return null;
 }
 
-return{
-uid: userSnap.docs[0].id,
-data: userSnap.docs[0].data()
+const result = {
+
+    uid: userSnap.docs[0].id,
+
+    data: userSnap.docs[0].data()
+
 };
+
+profileCache[channel] = result;
+
+return result;
 
 }
 export function setProfileUI(channelInfo, channel){
@@ -114,10 +123,12 @@ export async function setupProfile(videos, index){
 
     const channel =
     videos[index].channelName || "SAGAR ZONE";
-
+const expectedIndex = index;
     const channelInfo =
     await loadChannelInfo(channel);
-
+if (expectedIndex !== index) {
+    return;
+}
     setProfileUI(
         channelInfo,
         channel

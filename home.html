@@ -683,7 +683,7 @@ let currentVideoUrl = "";
   let activePlayer = "feed";
 let pendingIndex = -1;
 let switchingVideo = false;
-  let audioEnabled = false;
+  let audioEnabled = true;
   window.currentVideoId = "";
 window.currentOwnerId = "";
   function getActiveVideoPlayer() {
@@ -782,7 +782,7 @@ loaderElement.style.display = "none";
     }
 
 });
-  window.currentVideoId = videos[currentIndex].id;
+window.currentOwnerId = videos[currentIndex].userId;
 window.currentOwnerId = videos[currentIndex].userId;
   
   window.addEventListener("offline", () => {
@@ -916,7 +916,8 @@ try {
 
 const videoId =
 videos[index].id;
-
+window.currentVideoId = videoId;
+window.currentOwnerId = videos[index].userId;
 const currentVideoIndex = index;
 
   viewTimer = startCurrentViewTimer(
@@ -973,7 +974,6 @@ window.likeVideo = async function(){
 
 const liked = await likeVideo(
 videos,
-snapshot,
 currentIndex
 );
 

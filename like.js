@@ -7,13 +7,21 @@ increment,
 getDoc
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
 
+let likeInProgress = false;
+
 export async function likeVideo(
 videos,
-snapshot,
 currentIndex
 ){
-
 const videoId = videos[currentIndex].id;
+
+if (likeInProgress) {
+    return;
+}
+
+likeInProgress = true;
+
+try {
 // ===============================
 // Like Permission Check
 // ===============================
@@ -64,6 +72,22 @@ localStorage.setItem(likeKey,"true");
 videos[currentIndex].likes++;
 
 return true;
+
+}
+
+catch(e){
+
+    console.error("Like Error:", e);
+
+    alert("Unable to update like.");
+
+    return false;
+
+}
+
+finally{
+
+    likeInProgress = false;
 
 }
 
