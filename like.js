@@ -13,8 +13,7 @@ snapshot,
 currentIndex
 ){
 
-const videoId =
-snapshot.docs[currentIndex].id;
+const videoId = videos[currentIndex].id;
 // ===============================
 // Like Permission Check
 // ===============================
