@@ -812,7 +812,7 @@ async function loadVideo(index){
 }
 
 switchingVideo = true;
-
+currentIndex = index;
 pendingIndex = index;
   stopCurrentViewTimer(viewTimer);
 
@@ -877,40 +877,52 @@ preparePlayer(     preloadPlayer,     getVideoUrl(videos, nextIndex) );
     };
 
 }
-video.onloadeddata = async ()=>{
-video.style.visibility = "visible";
-  video.style.opacity = "1";
-loaderElement.style.display = "none";
+window.currentVideoId = videos[index].id;
+window.currentOwnerId = videos[index].userId;
 
-try{
+document.getElementById("videoTitle").innerText =
+getVideoTitle(videos, index);
 
-await video.play();
+updateLikeButton(
+    videos[index].id,
+    videos[index].likes
+);
 
-console.timeEnd("Video Load");
+updateViewCount(
+    getVideoViews(videos, index)
+);
 
-video.onloadeddata = null;
+setupProfile(videos, index);
+video.onloadeddata = async () => {
 
-switchingVideo = false;
+    video.onloadeddata = null;
 
-console.log("Video Started");
-try {
+    video.style.visibility = "visible";
+    video.style.opacity = "1";
 
-    await setupProfile(videos, index);
+    loaderElement.style.display = "none";
 
-} catch (error) {
+    try {
 
-    console.error("Profile setup failed:", error);
+        const playPromise = video.play();
 
-}
-  } catch (e) {
+        if (playPromise) {
+            await playPromise;
+        }
 
-    console.error(e);
+        console.timeEnd("Video Load");
 
-} finally {
+        console.log("Video Started");
 
-    switchingVideo = false;
+    } catch (e) {
 
-}
+        console.error("Video play failed:", e);
+
+    } finally {
+
+        switchingVideo = false;
+
+    }
 
 };
 
@@ -1049,7 +1061,6 @@ enableDoubleTap(video, async ()=>{
 const liked =
 await likeVideo(
 videos,
-snapshot,
 currentIndex
 );
 
