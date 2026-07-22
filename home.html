@@ -782,8 +782,7 @@ loaderElement.style.display = "none";
     }
 
 });
-window.currentOwnerId = videos[currentIndex].userId;
-window.currentOwnerId = videos[currentIndex].userId;
+
   
   window.addEventListener("offline", () => {
 
@@ -796,103 +795,104 @@ window.currentOwnerId = videos[currentIndex].userId;
 // LOAD VIDEO
 // =====================================
 async function loadVideo(index){
-  
-  if (index < 0 || index >= videos.length) {
-    console.log("Invalid video index:", index);
-    return;
-  }
-  console.log("LOAD VIDEO :", index);
-  console.time("Video Load");
-  if (switchingVideo) {
 
-    console.log("⏳ Video switch already in progress");
+    if(index < 0 || index >= videos.length){
+        return;
+    }
 
-    return;
+    if(switchingVideo){
+        return;
+    }
 
-}
+    switchingVideo = true;
 
-switchingVideo = true;
-currentIndex = index;
-pendingIndex = index;
-  stopCurrentViewTimer(viewTimer);
+    currentIndex = index;
+
+    pendingIndex = index;
+
+    console.time("Video Load");
+
+    stopCurrentViewTimer(viewTimer);
+
+    const currentVideo = videos[index];
+
+    window.currentVideoId = currentVideo.id;
+
+window.currentOwnerId = currentVideo.userId;
+
+    document.getElementById("videoTitle").innerText =
+    currentVideo.title || "";
+
+    updateLikeButton(
+        currentVideo.id,
+        currentVideo.likes || 0
+    );
+
+    updateViewCount(
+        currentVideo.views || 0
+    );
+
+    document.getElementById("commentCount").innerText = "0";
+
+    try{
+
+        await setupProfile(videos,index);
+
+    }catch(e){
+
+        console.error("Profile Error",e);
+
+    }
 
 
 const video = getActiveVideoPlayer();
-  feedVideo.muted = true;
+
+feedVideo.muted = true;
 preloadVideo.muted = true;
 
-video.muted = !audioEnabled;
-  console.log("🎬 Active:", activePlayer);
+video.pause();
 
-console.log(
-    "📺 Current Player:",
-    video.id
+preparePlayer(
+    video,
+    getVideoUrl(videos,index)
 );
+
 video.muted = !audioEnabled;
-  preloadVideo.muted = true;
+
 video.autoplay = true;
 video.playsInline = true;
 video.preload = "auto";
-  
-if (!(preloadReady && preloadIndex === index)) {
 
-    loaderElement.style.display = "block";
-
-} else {
-
-    loaderElement.style.display = "none";
-
-    console.log("⚡ Using Preloaded Video");
-
-}
-video.pause();
-  
-preparePlayer(
-    video,
-    getVideoUrl(videos, index)
-);
+loaderElement.style.display =
+(preloadReady && preloadIndex === index)
+? "none"
+: "block";
 const nextIndex = index + 1;
 
 preloadReady = false;
 preloadIndex = -1;
 
-if (nextIndex < videos.length) {
+if(nextIndex < videos.length){
 
-    const preloadPlayer = getInactiveVideoPlayer();
-console.log(
-    "⏭️ Preloading On:",
-    preloadPlayer.id
-);
-preparePlayer(     preloadPlayer,     getVideoUrl(videos, nextIndex) );
+    const preloadPlayer =
+    getInactiveVideoPlayer();
 
-    preloadPlayer.onloadeddata = () => {
+    preparePlayer(
+        preloadPlayer,
+        getVideoUrl(videos,nextIndex)
+    );
+
+    preloadPlayer.onloadeddata = ()=>{
 
         preloadReady = true;
         preloadIndex = nextIndex;
-
-        console.log("✅ Preloaded:", preloadIndex);
 
         preloadPlayer.onloadeddata = null;
 
     };
 
 }
-window.currentVideoId = videos[index].id;
-window.currentOwnerId = videos[index].userId;
 
-document.getElementById("videoTitle").innerText =
-getVideoTitle(videos, index);
-
-updateLikeButton(
-    videos[index].id,
-    videos[index].likes
-);
-
-updateViewCount(
-    getVideoViews(videos, index)
-);
-
-setupProfile(videos, index);
 video.onloadeddata = async () => {
 
     video.onloadeddata = null;
@@ -912,54 +912,40 @@ video.onloadeddata = async () => {
 
         console.timeEnd("Video Load");
 
-        console.log("Video Started");
+    } catch (err) {
 
-    } catch (e) {
+    console.error("Load Video Error:", err);
 
-        console.error("Video play failed:", e);
+    loaderElement.style.display = "none";
 
-    } finally {
+} finally {
 
-        switchingVideo = false;
+    switchingVideo = false;
 
     }
 
 };
 
-const videoId =
-videos[index].id;
-window.currentVideoId = videoId;
-window.currentOwnerId = videos[index].userId;
-const currentVideoIndex = index;
+const videoId = currentVideo.id;
 
-  viewTimer = startCurrentViewTimer(
+viewTimer = startCurrentViewTimer(
 
-video,
+    video,
 
-videoId,
+    videoId,
 
-currentVideoIndex,
+    index,
 
-() => currentIndex,
+    () => currentIndex,
 
-videos,
+    videos,
 
-(views)=>{
+    (views) => {
 
-    refreshViewUI(views);
+        refreshViewUI(views);
 
-}
+    }
 
-);
-
-document.getElementById("videoTitle").innerText =
-getVideoTitle(videos, index);
-
- document.getElementById("likeCount").innerText =
- videos[index].likes || 0;
-
-updateViewCount(
-    getVideoViews(videos, index)
 );
 
 const commentsQuery =
@@ -975,8 +961,8 @@ updateCommentCount(
 commentsSnap.size
 );
 updateLikeButton(
-videoId,
-videos[index].likes
+    videoId,
+    currentVideo.likes || 0
 );
 }
 // =====================================
